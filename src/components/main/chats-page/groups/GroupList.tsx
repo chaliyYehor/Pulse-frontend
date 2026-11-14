@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 import type { AppDispatch } from '../../../../store/store'
 import type {
 	GroupResponse,
+	GroupsResponse,
 } from '../../../../schemas/main/getGroupsResponse'
 import { socket } from '../../../../socket'
 import { useQueryClient } from '@tanstack/react-query'
@@ -34,14 +35,57 @@ export default function GroupList() {
 		const refreshGroups = () => {
 			void queryClient.invalidateQueries({ queryKey: ['groups'] })
 		}
+		const updateGroupPreview = (data: {
+			groupId: string
+			lastMessage: string | null
+			lastMessageAt: Date | string
+			unreadMessagesCount?: number
+		}) => {
+			const lastMessageAt = new Date(data.lastMessageAt)
+			queryClient.setQueryData<GroupsResponse>(['groups'], current =>
+				current && {
+					...current,
+					groups: current.groups
+						.map(item => item.group.id === data.groupId ? {
+							...item,
+							group: { ...item.group, lastMessage: data.lastMessage, lastMessageAt, updatedAt: lastMessageAt },
+							groupUser: data.unreadMessagesCount === undefined ? item.groupUser : {
+								...item.groupUser,
+								unreadMessagesCount: data.unreadMessagesCount,
+							},
+						} : item)
+						.sort((a, b) => b.group.updatedAt.getTime() - a.group.updatedAt.getTime()),
+				},
+			)
+			void queryClient.invalidateQueries({ queryKey: ['groups'] })
+		}
+		const clearGroupPreview = (data: { groupId: string }) => {
+			queryClient.setQueryData<GroupsResponse>(['groups'], current =>
+				current && {
+					...current,
+					groups: current.groups.map(item => item.group.id === data.groupId
+						? {
+							...item,
+							group: { ...item.group, lastMessage: null, lastMessageAt: null, updatedAt: new Date() },
+							groupUser: { ...item.groupUser, unreadMessagesCount: 0 },
+						}
+						: item),
+				},
+			)
+			void queryClient.invalidateQueries({ queryKey: ['groups'] })
+		}
 
 		socket.on('group:added', refreshGroups)
 		socket.on('group:deleted', refreshGroups)
 		socket.on('group:member-left', refreshGroups)
+		socket.on('group:message:received', updateGroupPreview)
+		socket.on('group:chat:cleared', clearGroupPreview)
 		return () => {
 			socket.off('group:added', refreshGroups)
 			socket.off('group:deleted', refreshGroups)
 			socket.off('group:member-left', refreshGroups)
+			socket.off('group:message:received', updateGroupPreview)
+			socket.off('group:chat:cleared', clearGroupPreview)
 		}
 	}, [queryClient])
 

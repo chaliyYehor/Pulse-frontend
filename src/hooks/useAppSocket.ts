@@ -67,6 +67,7 @@ export function useAppSocket(enabled: boolean) {
 			conversationId: string
 			lastMessage: string | null
 			lastMessageAt: Date | string | null
+			unreadMessagesCount?: number
 		}) => {
 			const lastMessageAt = data.lastMessageAt
 				? new Date(data.lastMessageAt)
@@ -83,6 +84,13 @@ export function useAppSocket(enabled: boolean) {
 										lastMessageAt,
 										updatedAt: lastMessageAt ?? new Date(),
 									},
+									conversationUser:
+										data.unreadMessagesCount === undefined
+											? chat.conversationUser
+											: {
+												...chat.conversationUser,
+												unreadMessagesCount: data.unreadMessagesCount,
+											},
 								}
 							: chat,
 					)
