@@ -59,6 +59,7 @@ export function useAppSocket(enabled: boolean) {
 		socket.on('chat:deleted', invalidateChats)
 		socket.on('message:received', invalidateChats)
 		socket.on('message:deleted', invalidateChats)
+		socket.on('chat:cleared', invalidateChats)
 		socket.on('presence:changed', handlePresenceChanged)
 		socket.on('call:history:updated', invalidatePreviousCalls)
 
@@ -72,6 +73,7 @@ export function useAppSocket(enabled: boolean) {
 			socket.off('chat:deleted', invalidateChats)
 			socket.off('message:received', invalidateChats)
 			socket.off('message:deleted', invalidateChats)
+			socket.off('chat:cleared', invalidateChats)
 			socket.off('presence:changed', handlePresenceChanged)
 			socket.off('call:history:updated', invalidatePreviousCalls)
 			socket.disconnect()
