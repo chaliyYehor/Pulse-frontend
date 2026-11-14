@@ -14,6 +14,7 @@ import {
 	groupMessageSchema,
 	type GroupMessage,
 } from '../../../schemas/main/getGroupMessagesResponse'
+import type { GroupsResponse } from '../../../schemas/main/getGroupsResponse'
 import { socket } from '../../../socket'
 import { useNavigate } from 'react-router-dom'
 import type { AppDispatch } from '../../../store/store'
@@ -53,6 +54,16 @@ export function useGroupSocketEvents({
 			{ groupId },
 			({ success, error }: { success: boolean; error: string | null }) => {
 				if (success) {
+					queryClient.setQueryData<GroupsResponse>(['groups'], current =>
+						current && {
+							...current,
+							groups: current.groups.map(item =>
+								item.group.id === groupId
+									? { ...item, groupUser: { ...item.groupUser, unreadMessagesCount: 0 } }
+									: item,
+							),
+						},
+					)
 					void queryClient.invalidateQueries({ queryKey: ['groups'] })
 				}
 				if (error) {
