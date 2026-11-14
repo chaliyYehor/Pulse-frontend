@@ -146,6 +146,8 @@ export function useChatSocketEvents({
 		const handleMessageReceived = (data: { conversationId: string }) => {
 			if (data.conversationId !== chatId) return
 
+			// Recover messages if the chat-room event was missed during socket setup.
+			void queryClient.invalidateQueries({ queryKey: messageQueryKey })
 			void queryClient.invalidateQueries({ queryKey: ['chats'] })
 			void queryClient.invalidateQueries({ queryKey: ['userInfoChat', chatId] })
 			void queryClient.invalidateQueries({
