@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { socket } from '../../../socket'
 import type { Message, Messages } from '../../../schemas/main/messages'
+import type { ChatsResponse } from '../../../schemas/main/getChatsResponse'
 import type { AppDispatch } from '../../../store/store'
 import { setPopUpError } from '../../../store/slices/popUpSlice'
 
@@ -49,6 +50,39 @@ export function useChatSocketEvents({
 			{ chatId },
 			({ success, error }: { success: boolean; error: string | null }) => {
 				if (success) {
+					queryClient.setQueryData<ChatsResponse>(['chats'], current =>
+						current?.map(chat =>
+							chat.conversation.id === chatId
+								? {
+										...chat,
+										conversationUser: {
+											...chat.conversationUser,
+											unreadMessagesCount: 0,
+										},
+									}
+								: chat,
+						),
+					)
+					setMessages(current =>
+						current.map(message =>
+							message.senderId !== userId ? { ...message, read: true } : message,
+						),
+					)
+					queryClient.setQueryData<InfiniteData<Messages, number>>(
+						messageQueryKey,
+						current =>
+							current && {
+								...current,
+								pages: current.pages.map(page => ({
+									...page,
+									messages: page.messages.map(message =>
+										message.senderId !== userId
+											? { ...message, read: true }
+											: message,
+									),
+								})),
+							},
+					)
 					void queryClient.invalidateQueries({ queryKey: ['chats'] })
 					void queryClient.invalidateQueries({ queryKey: ['messages', chatId] })
 				}
@@ -63,7 +97,7 @@ export function useChatSocketEvents({
 				}
 			},
 		)
-	}, [chatId, dispatch, queryClient])
+	}, [chatId, dispatch, messageQueryKey, queryClient, setMessages, userId])
 
 	useEffect(() => {
 		const handleNewMessages = (data: Messages['messages']) => {
@@ -127,6 +161,26 @@ export function useChatSocketEvents({
 
 		const handleMessagesRead = (data: { conversationId: string }) => {
 			if (data.conversationId === chatId) {
+				setMessages(current =>
+					current.map(message =>
+						message.senderId === userId ? { ...message, read: true } : message,
+					),
+				)
+				queryClient.setQueryData<InfiniteData<Messages, number>>(
+					messageQueryKey,
+					current =>
+						current && {
+							...current,
+							pages: current.pages.map(page => ({
+								...page,
+								messages: page.messages.map(message =>
+									message.senderId === userId
+										? { ...message, read: true }
+										: message,
+								),
+							})),
+						},
+				)
 				void queryClient.invalidateQueries({ queryKey: ['messages', chatId] })
 			}
 		}
