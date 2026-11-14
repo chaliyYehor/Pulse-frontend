@@ -153,12 +153,12 @@ export default function AddChat({
 					>
 						<ChatSearch isChatSearch control={control} name='search' />
 					</form>
-					{(isPending && isFetching) || isCreatorPending ? (
-						<div className='w-full h-full flex justify-center items-center'>
+					{isLoading || (isPending && isFetching) || isCreatorPending ? (
+						<div className='flex-1 min-h-0 w-full flex justify-center items-center'>
 							<div
 								className='loader'
 								role='status'
-								aria-label='Loading contacts'
+								aria-label={isLoading ? 'Opening chat' : 'Loading contacts'}
 							/>
 						</div>
 					) : normalizedSearch ? (
