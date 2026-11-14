@@ -7,6 +7,7 @@ import {
 	setGlobalSocketError,
 	setIsSocketConnected,
 } from '../store/slices/socketSlice'
+import type { ChatsResponse } from '../schemas/main/getChatsResponse'
 
 export function useAppSocket(enabled: boolean) {
 	const dispatch = useDispatch<AppDispatch>()
@@ -44,6 +45,38 @@ export function useAppSocket(enabled: boolean) {
 			void queryClient.invalidateQueries({ queryKey: ['chats'] })
 		}
 
+		const updateChatPreview = (data: {
+			conversationId: string
+			lastMessage: string | null
+			lastMessageAt: Date | string | null
+		}) => {
+			const lastMessageAt = data.lastMessageAt
+				? new Date(data.lastMessageAt)
+				: null
+			queryClient.setQueryData<ChatsResponse>(['chats'], current =>
+				current
+					?.map(chat =>
+						chat.conversation.id === data.conversationId
+							? {
+									...chat,
+									conversation: {
+										...chat.conversation,
+										lastMessage: data.lastMessage,
+										lastMessageAt,
+										updatedAt: lastMessageAt ?? new Date(),
+									},
+								}
+							: chat,
+					)
+					.sort(
+						(a, b) =>
+							b.conversation.updatedAt.getTime() -
+							a.conversation.updatedAt.getTime(),
+					),
+			)
+			void queryClient.invalidateQueries({ queryKey: ['chats'] })
+		}
+
 		const invalidatePreviousCalls = () => {
 			void queryClient.invalidateQueries({ queryKey: ['previousCalls'] })
 		}
@@ -57,8 +90,8 @@ export function useAppSocket(enabled: boolean) {
 		socket.on('connect_error', handleConnectError)
 		socket.on('chat:added', invalidateChats)
 		socket.on('chat:deleted', invalidateChats)
-		socket.on('message:received', invalidateChats)
-		socket.on('message:deleted', invalidateChats)
+		socket.on('message:received', updateChatPreview)
+		socket.on('message:deleted', updateChatPreview)
 		socket.on('chat:cleared', invalidateChats)
 		socket.on('presence:changed', handlePresenceChanged)
 		socket.on('call:history:updated', invalidatePreviousCalls)
@@ -71,8 +104,8 @@ export function useAppSocket(enabled: boolean) {
 			socket.off('connect_error', handleConnectError)
 			socket.off('chat:added', invalidateChats)
 			socket.off('chat:deleted', invalidateChats)
-			socket.off('message:received', invalidateChats)
-			socket.off('message:deleted', invalidateChats)
+			socket.off('message:received', updateChatPreview)
+			socket.off('message:deleted', updateChatPreview)
 			socket.off('chat:cleared', invalidateChats)
 			socket.off('presence:changed', handlePresenceChanged)
 			socket.off('call:history:updated', invalidatePreviousCalls)
