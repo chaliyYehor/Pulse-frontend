@@ -7,7 +7,7 @@ import {
 	setGlobalSocketError,
 	setIsSocketConnected,
 } from '../store/slices/socketSlice'
-import type { ChatsResponse } from '../schemas/main/getChatsResponse'
+import type { ChatResponse, ChatsResponse } from '../schemas/main/getChatsResponse'
 
 export function useAppSocket(enabled: boolean) {
 	const dispatch = useDispatch<AppDispatch>()
@@ -42,6 +42,24 @@ export function useAppSocket(enabled: boolean) {
 		}
 
 		const invalidateChats = () => {
+			void queryClient.invalidateQueries({ queryKey: ['chats'] })
+		}
+
+		const handleChatAdded = (chat: ChatResponse) => {
+			queryClient.setQueryData<ChatsResponse>(['chats'], current => {
+				if (!current) return current
+				if (current.some(item => item.conversation.id === chat.conversation.id)) return current
+				return [...current, chat].sort(
+					(a, b) => b.conversation.updatedAt.getTime() - a.conversation.updatedAt.getTime(),
+				)
+			})
+			void queryClient.invalidateQueries({ queryKey: ['chats'] })
+		}
+
+		const handleChatDeleted = (data: { conversationId: string }) => {
+			queryClient.setQueryData<ChatsResponse>(['chats'], current =>
+				current?.filter(chat => chat.conversation.id !== data.conversationId),
+			)
 			void queryClient.invalidateQueries({ queryKey: ['chats'] })
 		}
 
@@ -88,8 +106,8 @@ export function useAppSocket(enabled: boolean) {
 		socket.on('connect', handleConnect)
 		socket.on('disconnect', handleDisconnect)
 		socket.on('connect_error', handleConnectError)
-		socket.on('chat:added', invalidateChats)
-		socket.on('chat:deleted', invalidateChats)
+		socket.on('chat:added', handleChatAdded)
+		socket.on('chat:deleted', handleChatDeleted)
 		socket.on('message:received', updateChatPreview)
 		socket.on('message:deleted', updateChatPreview)
 		socket.on('chat:cleared', invalidateChats)
@@ -102,8 +120,8 @@ export function useAppSocket(enabled: boolean) {
 			socket.off('connect', handleConnect)
 			socket.off('disconnect', handleDisconnect)
 			socket.off('connect_error', handleConnectError)
-			socket.off('chat:added', invalidateChats)
-			socket.off('chat:deleted', invalidateChats)
+			socket.off('chat:added', handleChatAdded)
+			socket.off('chat:deleted', handleChatDeleted)
 			socket.off('message:received', updateChatPreview)
 			socket.off('message:deleted', updateChatPreview)
 			socket.off('chat:cleared', invalidateChats)
