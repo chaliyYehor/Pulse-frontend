@@ -11,10 +11,10 @@ export default function SubmitBtn({
 }) {
 	return (
 		<Button
-		className='registrationAnim'
 			type='submit'
 			variant='contained'
 			disabled={isSubmitting}
+			aria-busy={isSubmitting}
 			onClick={onClick}
 			sx={{
 				width: '100%',
@@ -43,7 +43,11 @@ export default function SubmitBtn({
 			}}
 		>
 			{isSubmitting ? (
-				<div className='loader' role='status' aria-label='Submitting' />
+				<span
+					className='submitLoader'
+					role='status'
+					aria-label='Submitting'
+				/>
 			) : (
 				label
 			)}

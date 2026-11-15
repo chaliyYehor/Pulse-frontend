@@ -1,5 +1,5 @@
 import { Box } from '@mui/material'
-import { useFormContext, type SubmitHandler } from 'react-hook-form'
+import { useFormContext, useFormState, type SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { authClient } from '../../lib/auth-client'
 import type { SignUpType } from '../../schemas/auth/signUp'
@@ -18,8 +18,9 @@ export default function SignUpForm({ globalError, setGlobalError }: Props) {
 	const {
 		control,
 		handleSubmit,
-		formState: { isSubmitting },
+		reset,
 	} = useFormContext<SignUpType>()
+	const { isSubmitting } = useFormState({ control })
 
 	const onSubmit: SubmitHandler<SignUpType> = async data => {
 		const { name, email, password } = data
@@ -35,6 +36,7 @@ export default function SignUpForm({ globalError, setGlobalError }: Props) {
 			setGlobalError(error.message!)
 			return
 		}
+		reset()
 		navigate('/verify')
 	}
 

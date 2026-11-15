@@ -153,6 +153,22 @@ input:-webkit-autofill:active {
 		l20-2 1.6s infinite linear;
 }
 
+.submitLoader {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border: 2px solid rgba(255, 255, 255, 0.35);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: submit-loader-spin 0.7s linear infinite;
+}
+
+@keyframes submit-loader-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .dark .loader {
 	border-color: white;
 }
