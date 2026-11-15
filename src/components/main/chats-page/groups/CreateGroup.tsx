@@ -108,7 +108,6 @@ export default function CreateGroup({
 				groupId: string
 			}) => {
 				if (success) {
-					console.log('Chat created successfully')
 					await queryClient.invalidateQueries({ queryKey: ['groups'] })
 					setIsLoading(false)
 					closeCreateGroup()

@@ -171,7 +171,6 @@ export default function SendAMessage({
 				resetAfterSend()
 				isSendingRef.current = false
 				setIsSending(false)
-				console.log('Message sent successfully')
 			},
 		)
 	}
@@ -270,7 +269,7 @@ export default function SendAMessage({
 			) : null}
 			<form
 				aria-label='Send a message'
-				onSubmit={handleSubmit(onSubmit, errors => console.log(errors))}
+				onSubmit={handleSubmit(onSubmit)}
 				className='messageInput w-full dark:bg-[#1e1e26] bg-[#ebebf0] flex items-center gap-4 rounded-2xl px-4 py-2 text-[#6B6B80] select-none'
 			>
 				<span className='sr-only' role='status' aria-live='polite' aria-atomic='true'>

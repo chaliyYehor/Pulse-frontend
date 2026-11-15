@@ -204,7 +204,6 @@ export default function Group() {
 			([entry]) => {
 				if (entry?.isIntersecting) {
 					markAsRead()
-					console.log('New message is visible, mark as read')
 				}
 			},
 			{ threshold: 0.5 },
@@ -263,8 +262,6 @@ export default function Group() {
 		if (!isMessagesPending && messagesState.length > 0 && !hasScrolled) {
 			chatref.current?.scrollTo({ top: 0, behavior: 'instant' })
 		}
-
-		console.log(latestMessageRef.current)
 	}, [messagesState, isMessagesPending])
 
 	const socketError = useSelector(

@@ -44,12 +44,6 @@ export default function ChatRightClick({
 			{ conversationId: chatId, value: isPinned ? false : true },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log(
-						isPinned
-							? 'Chat unpinned successfully'
-							: 'Chat pinned successfully',
-					)
-
 					await queryClient.invalidateQueries({
 						queryKey: ['chats'],
 					})
@@ -76,8 +70,6 @@ export default function ChatRightClick({
 			{ conversationId: chatId },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log('Chat deleted successfully')
-
 					navigate('/chats', { replace: true })
 
 					await queryClient.invalidateQueries({
@@ -106,8 +98,6 @@ export default function ChatRightClick({
 			{ groupId: chatId },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log('Group deleted successfully')
-
 					navigate('/groups', { replace: true })
 
 					await queryClient.invalidateQueries({
@@ -135,8 +125,6 @@ export default function ChatRightClick({
 			{ groupId: chatId },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log('Group left successfully')
-
 					navigate('/groups', { replace: true })
 
 					await queryClient.invalidateQueries({
