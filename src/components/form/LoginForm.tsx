@@ -1,5 +1,5 @@
 import { Box } from '@mui/material'
-import { useFormContext, type SubmitHandler } from 'react-hook-form'
+import { useFormContext, useFormState, type SubmitHandler } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { authClient } from '../../lib/auth-client'
 import type { LoginType } from '../../schemas/auth/login'
@@ -18,8 +18,9 @@ export default function LoginForm({ globalError, setGlobalError }: Props) {
 	const {
 		control,
 		handleSubmit,
-		formState: { isSubmitting },
+		reset,
 	} = useFormContext<LoginType>()
+	const { isSubmitting } = useFormState({ control })
 
 	const onSubmit: SubmitHandler<LoginType> = async data => {
 		const { email, password } = data
@@ -37,6 +38,8 @@ export default function LoginForm({ globalError, setGlobalError }: Props) {
 			setGlobalError(error.message!)
 			return
 		}
+
+		reset()
 	}
 
 	return (
