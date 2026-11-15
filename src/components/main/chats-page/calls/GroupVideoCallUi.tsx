@@ -144,7 +144,6 @@ export default function ({
 				room.localParticipant,
 				...room.remoteParticipants.values(),
 			])
-			console.log('Action')
 		}
 
 		room.on(RoomEvent.Connected, syncParticipants)

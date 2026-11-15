@@ -245,7 +245,6 @@ export function Chat() {
 			chatref.current?.scrollTo({ top: 0, behavior: 'instant' })
 		}
 
-		console.log(latestMessageRef.current)
 	}, [messagesState, isMessagesPending])
 
 	useEffect(() => {

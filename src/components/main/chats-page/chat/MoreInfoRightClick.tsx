@@ -59,12 +59,6 @@ export default function MoreInfoRightClick({
 			{ conversationId: chatId, value: isPinned ? false : true },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log(
-						isPinned
-							? 'Chat unpinned successfully'
-							: 'Chat pinned successfully',
-					)
-
 					await Promise.all([
 						queryClient.invalidateQueries({
 							queryKey: ['chats'],
@@ -104,7 +98,6 @@ export default function MoreInfoRightClick({
 			{ conversationId: chatId },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log('Chat cleared successfully')
 					await Promise.all([
 						queryClient.invalidateQueries({
 							queryKey: ['chats'],
@@ -164,7 +157,6 @@ export default function MoreInfoRightClick({
 			{ groupId: chatId },
 			async ({ success, error }: { success: boolean; error?: string }) => {
 				if (success) {
-					console.log('Group chat cleared successfully')
 					await Promise.all([
 						queryClient.invalidateQueries({
 							queryKey: ['groups'],

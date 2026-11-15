@@ -183,7 +183,6 @@ export default function AddChat({
 													conversationId?: string
 												}) => {
 													if (success) {
-														console.log('Chat created successfully')
 														await queryClient.invalidateQueries({
 															queryKey: ['chats'],
 														})
@@ -239,7 +238,6 @@ export default function AddChat({
 											conversationId?: string
 										}) => {
 											if (success) {
-												console.log('Chat created successfully')
 												await queryClient.invalidateQueries({
 													queryKey: ['chats'],
 												})
